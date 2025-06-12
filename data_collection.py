@@ -133,8 +133,8 @@ class DataCollection:
       print("master_arm_right_state is None!")
       return False
     
-    if self.puppet_arm_left_state is None:
-      print("puppet_arm_left_state is None!")
+    if self.puppet_arm_right_state is None:
+      print("puppet_arm_right_state is None!")
       return False
     
     if self.cfg.robotif_arm_cfg.enable_left_arm:
@@ -146,9 +146,9 @@ class DataCollection:
         print("puppet_arm_left_state is None!")
         return False
     
-    if self.img_right is None:
-      print("img_right is None!")
-      return False
+    # if self.img_right is None:
+    #   print("img_right is None!")
+    #   return False
     
     return (self.master_arm_right_state, self.puppet_arm_left_state, self.img_right)
     
@@ -297,7 +297,7 @@ class DataCollection:
       print("Please press key [S] to start collect {}th episode!".format(i+1))
       wait_for_s()
       
-      print("Start collect data! Please press [Enter] to end collect {}th episode!".format(i+1))
+      print("Start collect data! Please press [E] to end collect {}th episode!".format(i+1))
       # collecte one episode
       timesteps, actions = self.collect()
       

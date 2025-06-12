@@ -1,7 +1,7 @@
 dataset_dir: "/home/ubuntu/IMETA_LAB/data_collection/data"
 task_name: "piper_pick_and_place"
 num_episodes: 2
-save_rate: 200
+save_rate: 50
 
 robotif_arm_cfg:
   master_arm_right_topic: "/master_arm_right/joint_states"

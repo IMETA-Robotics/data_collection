@@ -1,4 +1,4 @@
-dataset_dir: "/home/ubuntu/IMETA_LAB/data_collection/data"
+dataset_dir: "/home/zxf/IMETA_LAB/data_collection/data"
 task_name: "piper_pick_and_place"
 num_episodes: 2
 save_rate: 50

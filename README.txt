@@ -12,6 +12,16 @@
     pip install h5py
     pip install matplotlib
 
+### Create conda environment:
+(recommend):
+mamba env create -f conda_environment.yml
+
+but you can use conda as well:
+conda env create -f conda_environment.yml
+
+
+###Useage:
+
 
 ###h5dump 用法:
 

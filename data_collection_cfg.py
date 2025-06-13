@@ -91,7 +91,7 @@ def build_config():
     # print("yaml_cfg: ", yaml_cfg)
     base_cfg = OmegaConf.merge(base_cfg, yaml_cfg)
   else:
-    raise ValueError("YAML file path is not provided.")
+    raise ValueError("arg config_file=your_path must provided.")
   
   # Step 3: Merge CLI args
   if "config_file" in cli_cfg:

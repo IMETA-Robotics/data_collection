@@ -146,9 +146,9 @@ class DataCollection:
         print("puppet_arm_left_state is None!")
         return False
     
-    # if self.img_right is None:
-    #   print("img_right is None!")
-    #   return False
+    if self.img_right is None:
+      print("img_right is None!")
+      return False
     
     return (self.master_arm_right_state, self.puppet_arm_left_state, self.img_right)
     

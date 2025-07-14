@@ -12,7 +12,7 @@ def load_hdf5(dataset_dir, dataset_name):
     raise FileNotFoundError(f"Dataset file {dataset_path} not found.")
 
   with h5py.File(dataset_path, 'r') as root:
-    # obervation
+    # observation
     joint_position = root['/observation/qpos'][()]
     joint_velocity = root['/observation/qvel'][()]
     joint_effort = root['/observation/effort'][()]

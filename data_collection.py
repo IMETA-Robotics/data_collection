@@ -10,7 +10,7 @@ import time
 import h5py
 # import cv2
 from cv_bridge import CvBridge
-from data_handle import wait_for_s, is_e_pressed, get_auto_index, start_e_listener
+from control_utils import wait_for_s, is_e_pressed, get_auto_index, start_e_listener
 
 class DataCollection:
   def __init__(self, cfg: DataCollectionCfg):

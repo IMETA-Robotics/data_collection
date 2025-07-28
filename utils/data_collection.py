@@ -8,8 +8,6 @@ import numpy as np
 # import cv2
 from cv_bridge import CvBridge
 from utils.data_handle import wait_for_s, is_e_pressed, start_e_listener
-from dataset.hdf5_dataset import H5Dataset
-from dataset.lerobot_dataset import LRDataset
 
 class DataCollection:
   def __init__(self, cfg: DataCollectionCfg):
@@ -249,10 +247,12 @@ class DataCollection:
     
     # whether save data as hdf5
     if self.cfg.hdf5_cfg.save_as_h5:
+      from dataset.hdf5_dataset import H5Dataset
       h5_dataset = H5Dataset(self.cfg)
     
     # whether save data as lerobot dataset
     if self.cfg.lerobot_dataset_cfg.save_as_lerobot:
+      from dataset.lerobot_dataset import LRDataset
       lerobot_dataset = LRDataset(self.cfg)
     
     start_e_listener()

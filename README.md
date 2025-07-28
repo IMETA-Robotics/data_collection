@@ -13,20 +13,22 @@
     pip install matplotlib
 
 ### Create conda environment:
-(recommend):
-mamba env create -f conda_environment.yml
-
-but you can use conda as well:
 conda env create -f conda_environment.yml
 
-### Useage:
-collecte data:
-python scripts/record_data.py config_file=cfg/one_master_slave.yaml num_episodes=30
+if you want use lerobot datasets, install lerobot:
+git clone https://github.com/imeta-lab/imeta_lerobot.git
+cd imeta_lerobot/lerobot
+pip install -e .
 
+### Usage:
+collecte data(support hdf5 and lerobot format):
 python -m scripts.record_data config_file=cfg/one_master_slave.yaml
 
-visualize data:
-python scripts/visualize_episodes.py --dataset_dir data/piper_pick_and_place/ --episode_idx 0
+visualize hdf5 data:
+python -m scripts.visualize_episodes --dataset_dir data/piper_pick_and_place/ --episode_idx 0
+
+visualize lerobot data:
+
 
 ### TODO:
 1. 一次多条数据采集的时候，可以取消中间某条数据，重新采集该数据

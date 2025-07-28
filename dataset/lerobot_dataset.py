@@ -7,8 +7,8 @@ import time
 import numpy as np
 import os
 from utils.data_collection_cfg import DataCollectionCfg
-from lerobot.common.constants import HF_LEROBOT_HOME
-from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
+from lerobot.constants import HF_LEROBOT_HOME
+from lerobot.datasets.lerobot_dataset import LeRobotDataset
 
 class LRDataset:
   def __init__(self, cfg: DataCollectionCfg):

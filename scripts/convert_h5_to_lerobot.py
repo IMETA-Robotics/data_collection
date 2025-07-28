@@ -14,8 +14,8 @@ import h5py
 import tqdm
 from dataclasses import dataclass
 from pathlib import Path
-from lerobot.common.constants import HF_LEROBOT_HOME
-from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
+from lerobot.constants import HF_LEROBOT_HOME
+from lerobot.datasets.lerobot_dataset import LeRobotDataset
 
 @dataclass
 class CovertConfig:

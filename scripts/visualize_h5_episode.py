@@ -13,9 +13,7 @@ def load_hdf5(dataset_dir, dataset_name):
 
   with h5py.File(dataset_path, 'r') as root:
     # observation
-    joint_position = root['/observation/qpos'][()]
-    joint_velocity = root['/observation/qvel'][()]
-    joint_effort = root['/observation/effort'][()]
+    joint_position = root['/observation/state'][()]
     
     image_dict = dict()
     for cam_name in root[f'/observation/images/'].keys():
@@ -24,7 +22,7 @@ def load_hdf5(dataset_dir, dataset_name):
     # action
     action = root['/action'][()]
     
-  return joint_position, joint_velocity, joint_effort, image_dict, action
+  return joint_position, image_dict, action
 
 def visualize_joints(obs_list, command_list, plot_path):
   """visualize joint position or velocity or effort"""
@@ -99,22 +97,17 @@ def main(args):
   dataset_name = f"episode_{episode_idx}"
   
   # load data from hdf5 file
-  joint_position, joint_velocity, joint_effort, image_dict, action = load_hdf5(dataset_dir, dataset_name)
+  joint_position, image_dict, action = load_hdf5(dataset_dir, dataset_name)
   
   # save video
-  save_video(image_dict, 50, video_path=os.path.join(dataset_dir, dataset_name + "_video.mp4"))
+  save_video(image_dict, 30, video_path=os.path.join(dataset_dir, dataset_name + "_video.mp4"))
   # visual joint position and action
   visualize_joints(joint_position, action, 
-                   plot_path=os.path.join(dataset_dir, dataset_name + "_joint_postion_and_action.png"))
-  # visual single joint velocity
-  visualize_single_data(joint_velocity, 'joint_velocity', 
-                        plot_path=os.path.join(dataset_dir, dataset_name + "_joint_velocity.png"))
-  # visual single joint effort
-  visualize_single_data(joint_effort, 'joint_effort', 
-                        plot_path=os.path.join(dataset_dir, dataset_name + "_joint_effort.png"))
+                   plot_path=os.path.join(dataset_dir, dataset_name + "_state_and_action.png"))
+
   # visual error of joint position and action
-  visualize_single_data(action - joint_position, 'joint_position_and_action_error', 
-                        plot_path=os.path.join(dataset_dir, dataset_name + '_joint_position_and_action_error.png'))
+  visualize_single_data(action - joint_position, 'state_and_action_error', 
+                        plot_path=os.path.join(dataset_dir, dataset_name + '_state_and_action_error.png'))
 
 if __name__ == "__main__":
   # parse cli args

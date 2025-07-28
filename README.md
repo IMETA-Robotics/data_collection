@@ -21,10 +21,12 @@ conda env create -f conda_environment.yml
 
 ### Useage:
 collecte data:
-python record_data.py config_file=config/one_master_slave.yaml num_episodes=30
+python scripts/record_data.py config_file=cfg/one_master_slave.yaml num_episodes=30
+
+python -m scripts.record_data config_file=cfg/one_master_slave.yaml
 
 visualize data:
-python visualize_episodes.py --dataset_dir data/piper_pick_and_place/ --episode_idx 0
+python scripts/visualize_episodes.py --dataset_dir data/piper_pick_and_place/ --episode_idx 0
 
 ### TODO:
 1. 一次多条数据采集的时候，可以取消中间某条数据，重新采集该数据

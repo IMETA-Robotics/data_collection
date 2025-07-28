@@ -1,0 +1,26 @@
+task_description: "two_arm_teleop"
+num_episodes: 2
+save_rate: 30
+
+hdf5_cfg:
+  save_as_h5: True
+  dataset_dir: "data/"
+  task_name: "two_arm_teleop"
+
+lerobot_dataset_cfg:
+  save_as_lerobot: True
+  repo_id: "piper/two_arm_teleop"
+  robot_type: "piper"
+
+robotif_arm_cfg:
+  master_arm_right_topic: "/master_arm_right/joint_states"
+  puppet_arm_right_topic: "/puppet_arm_right/joint_states"
+  enable_left_arm: true
+  master_arm_left_topic: "/master_arm_left/joint_states"
+  puppet_arm_left_topic: "/puppet_arm_left/joint_states"
+
+camera_cfg:
+  camera_names: ["cam_right_wrist", "cam_front", "came_left_wrist"]
+  img_right_topic: "/camera_right/color/image_raw"
+  img_left_topic: "/camera_left/color/image_raw"
+  img_front_topic: "/camera_front/color/image_raw"

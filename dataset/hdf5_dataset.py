@@ -96,7 +96,7 @@ class H5Dataset:
     # save in hdf5 format
     start_time = time.time()
     with h5py.File(dataset_path, "w") as root:
-      root.attrs["sim"] = False
+      # root.attrs["sim"] = False
       root.attrs["task"] = self.cfg.task_description
       
       # save observation group

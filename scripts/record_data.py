@@ -2,7 +2,7 @@
 record data.
 
 example:
-  python scripts/record_data.py config_file=cfg/one_master_slave.yaml
+  python -m scripts.record_data config_file=cfg/one_master_slave.yaml
 
 """
 

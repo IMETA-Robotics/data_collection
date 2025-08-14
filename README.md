@@ -30,8 +30,7 @@ python -m scripts.convert_h5_to_lerobot --config.raw-dir=data/piper_place_and_pl
 visualize hdf5 data:
 python -m scripts.visualize_episodes --dataset_dir data/piper_pick_and_place/ --episode_idx 0
 
-visualize lerobot data:
-
+visualize lerobot data:(TODO)
 
 ### TODO:
 1. 一次多条数据采集的时候，可以取消中间某条数据，重新采集该数据

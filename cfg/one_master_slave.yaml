@@ -1,15 +1,15 @@
 task_description: "piper pick and place"
-num_episodes: 100
+num_episodes: 60
 save_rate: 30
 
 hdf5_cfg:
   save_as_h5: True
   dataset_dir: "data/"
-  task_name: "piper_place_and_place_0727"
+  task_name: "piper_place_and_place_0729"
 
 lerobot_dataset_cfg:
   save_as_lerobot: False
-  repo_id: "piper/place_and_place_0727"
+  repo_id: "piper/place_and_place_0729"
   robot_type: "piper"
 
 robotif_arm_cfg:

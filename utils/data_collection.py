@@ -7,7 +7,7 @@ import dm_env
 import numpy as np
 # import cv2
 from cv_bridge import CvBridge
-from utils.data_handle import wait_for_s, is_e_pressed, start_e_listener
+from utils.key_handle import init_keyboard_listener
 
 class DataCollection:
   def __init__(self, cfg: DataCollectionCfg):
@@ -184,13 +184,21 @@ class DataCollection:
      
     return frame
     
-  def collect(self):
+  def collect(self, events: dict):
     rate = rospy.Rate(self.cfg.save_rate)
     timesteps = []
     actions = []
     first_step = True
     
-    while not rospy.is_shutdown() and not is_e_pressed():
+    while not rospy.is_shutdown():
+      if events["finish_current_recording"]:
+        events["finish_current_recording"] = False
+        break
+      
+      if events["stop_recording"]:
+        print("Exit program!")
+        exit(1)
+      
       frame = self.get_frame() 
       if not frame:
         print("get frame failed!")
@@ -255,16 +263,35 @@ class DataCollection:
       from dataset.lerobot_dataset import LRDataset
       lerobot_dataset = LRDataset(self.cfg)
     
-    start_e_listener()
-    # 一共可以采集num_episodes条数据
-    for i in range(self.cfg.num_episodes):
-      # TODO: 每次采集前让机械臂回初始零位？
-      print("Please press key [S] to start collect {}th episode!".format(i+1))
-      wait_for_s()
+    # start_e_listener()
+    listener, events = init_keyboard_listener()
+    if listener is None:
+      exit(1)
       
-      print("Start collect data! Please press [E] to end collect {}th episode!".format(i+1))
+    # 一共可以采集num_episodes条数据
+    count = 0
+    while count < self.cfg.num_episodes:
+    # for i in range(self.cfg.num_episodes):
+      # TODO: 每次采集前让机械臂回初始零位？
+      print(f"Press key [S] to start record {count + 1}th episode!")
+      while events["start_recording"] is False:
+        if events["stop_recording"]:
+          print("Exit program!")
+          exit(1)
+          
+      events["start_recording"] = False
+      print("Start record data! Press [E] to finish record current episode, or [R] to rerecord!")
       # collecte one episode
-      timesteps, actions = self.collect()
+      timesteps, actions = self.collect(events)
+      
+      if len(actions) == 0:
+        print(f"Data is empty, rerecord {count + 1}th episode!")
+        continue
+      
+      if events["rerecord_episode"]:
+        print(f"Rerecord {count + 1}th episode!")
+        events["rerecord_episode"] = False
+        continue
       
       # save as hdf5
       if self.cfg.hdf5_cfg.save_as_h5:
@@ -273,3 +300,6 @@ class DataCollection:
       # save as lerobotdatset
       if self.cfg.lerobot_dataset_cfg.save_as_lerobot:
         lerobot_dataset.save_to_lerobot(timesteps, actions)
+      
+      count += 1 
+      

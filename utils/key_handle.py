@@ -1,6 +1,10 @@
 import traceback
-from functools import cache
 import logging
+try:
+    from functools import cache
+except ImportError:
+    from functools import lru_cache
+    cache = lru_cache(maxsize=None)
 
 @cache
 def is_headless():
@@ -25,9 +29,10 @@ def init_keyboard_listener():
     # by tapping the right arrow key '->'. This might require a sudo permission
     # to allow your terminal to monitor keyboard events.
     events = {}
-    events["exit_early"] = False
     events["rerecord_episode"] = False
     events["stop_recording"] = False
+    events["start_recording"] = False
+    events["finish_current_recording"] = False
 
     if is_headless():
         logging.warning(
@@ -40,18 +45,22 @@ def init_keyboard_listener():
     from pynput import keyboard
 
     def on_press(key):
-        try:
-            if key == keyboard.Key.right:
-                print("Right arrow key pressed. Exiting loop...")
-                events["exit_early"] = True
-            elif key == keyboard.Key.left:
-                print("Left arrow key pressed. Exiting loop and rerecord the last episode...")
-                events["rerecord_episode"] = True
-                events["exit_early"] = True
-            elif key == keyboard.Key.esc:
-                print("Escape key pressed. Stopping data recording...")
-                events["stop_recording"] = True
-                events["exit_early"] = True
+        try:            
+            if hasattr(key, "char"):
+                if key.char.lower() == "e":
+                    # finish recording current episode
+                    events["finish_current_recording"] = True
+                elif key.char.lower() == "r":
+                    # Exiting loop and rerecord the last episode...
+                    events["finish_current_recording"] = True
+                    events["rerecord_episode"] = True
+                elif key.char.lower() == "q":
+                    # stop recording
+                    events["stop_recording"] = True
+                elif key.char.lower() == "s":
+                    # start recording
+                    events["start_recording"] = True
+                    
         except Exception as e:
             print(f"Error handling key press: {e}")
 

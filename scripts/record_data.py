@@ -2,6 +2,7 @@
 record data.
 
 example:
+  source Y1/devel/setup.bash
   python -m scripts.record_data config_file=cfg/one_master_slave.yaml
 
 """

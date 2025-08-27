@@ -12,10 +12,10 @@ lerobot_dataset_cfg:
   repo_id: "piper/two_arm_teleop"
   robot_type: "piper"
 
-robotif_arm_cfg:
+robotic_arm_cfg:
+  collection_type: "two_master_slave"
   master_arm_right_topic: "/master_arm_right/joint_states"
   puppet_arm_right_topic: "/puppet_arm_right/joint_states"
-  enable_left_arm: true
   master_arm_left_topic: "/master_arm_left/joint_states"
   puppet_arm_left_topic: "/puppet_arm_left/joint_states"
 

@@ -43,11 +43,14 @@ class LeRobotDatasetCfg:
 @dataclass
 class RoboticArmCfg:
   """Configuration for robotic arm."""
+  collection_type: Optional[str] = None
+  """data collection type, can be 'one_master' or 'two_master' 
+      or 'one_master_slave' or 'two_master_slave' """
   
-  master_arm_right_topic: str = "/master_arm_right/joint_states"
+  master_arm_right_topic: Optional[str] = None
   """Right master arm joint states topic."""
   
-  puppet_arm_right_topic: str = "/puppet_arm_right/joint_states"
+  puppet_arm_right_topic: Optional[str] = None
   """Right puppet arm joint states topic."""
   
   enable_left_arm: bool = False
@@ -72,7 +75,7 @@ class CameraCfg:
   camera_names: List[str] = field(default_factory=list)
   """The camera name in saved data"""
   
-  img_right_topic: str = "/camera_right/color/image_raw"
+  img_right_topic: Optional[str] = None
   """right camera rgb image topic"""
   
   img_left_topic: Optional[str] = None
@@ -83,9 +86,6 @@ class CameraCfg:
   
   img_top_topic: Optional[str] = None
   """top camera rgb image topic"""
-  
-  enable_depth_image: bool = False
-  """Whether to enable depth image"""
   
   depth_right_topic: Optional[str] = None
   """right camera depth image topic"""
@@ -117,7 +117,7 @@ class DataCollectionCfg:
   lerobot_dataset_cfg: LeRobotDatasetCfg = LeRobotDatasetCfg()
   """Configuration for save data as lerobot dataset."""
   
-  robotif_arm_cfg: RoboticArmCfg = RoboticArmCfg()
+  robotic_arm_cfg: RoboticArmCfg = RoboticArmCfg()
   """Configuration for robotic arm."""
   
   camera_cfg: CameraCfg = CameraCfg()

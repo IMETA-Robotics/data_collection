@@ -12,7 +12,8 @@ lerobot_dataset_cfg:
   repo_id: "piper/place_and_place_0729"
   robot_type: "piper"
 
-robotif_arm_cfg:
+robotic_arm_cfg:
+  collection_type: "one_master_slave"
   master_arm_right_topic: "/master_arm_right/joint_states"
   puppet_arm_right_topic: "/puppet_arm_right/joint_states"
 

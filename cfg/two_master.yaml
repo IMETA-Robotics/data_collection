@@ -1,0 +1,22 @@
+task_description: "y1 pick and place"
+num_episodes: 2
+save_rate: 30
+
+hdf5_cfg:
+  save_as_h5: True
+  dataset_dir: "data/"
+  task_name: "y1_place_and_place_0827"
+
+lerobot_dataset_cfg:
+  save_as_lerobot: False
+  repo_id: "y1/place_and_place_0827"
+  robot_type: "y1"
+
+robotic_arm_cfg:
+  collection_type: "two_master"
+  master_arm_right_topic: "/master_arm_right/joint_states"
+  master_arm_left_topic: "/master_arm_left/joint_states"
+
+camera_cfg:
+  camera_names: ["cam_front"]
+  img_front_topic: "/camera_front/color/image_raw"

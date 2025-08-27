@@ -28,7 +28,7 @@ convert hdf5 data to lerobot:
 python -m scripts.convert_h5_to_lerobot --config.raw-dir=data/piper_place_and_place_0729/ --config.repo-id=piper/piper_place_and_place_0729
 
 visualize hdf5 data:
-python -m scripts.visualize_episodes --dataset_dir data/piper_pick_and_place/ --episode_idx 0
+python -m scripts.visualize_h5_episode --dataset_dir data/piper_pick_and_place/ --episode_idx 0
 
 visualize lerobot data:(TODO)
 

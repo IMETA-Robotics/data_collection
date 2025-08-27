@@ -51,7 +51,7 @@ class LRDataset:
     names = ["J1", "J2", "J3", "J4", "J5", "J6", "Gripper"]
     cameras = cfg.camera_cfg.camera_names
     
-    if (cfg.robotif_arm_cfg.enable_left_arm):
+    if (cfg.robotic_arm_cfg.enable_left_arm):
       shape = (14,)
     else:
       shape = (7,)
@@ -63,14 +63,14 @@ class LRDataset:
       "names": names
     }
     
-    if self.cfg.robotif_arm_cfg.use_joint_effort:
+    if self.cfg.robotic_arm_cfg.use_joint_effort:
       features["observation.effort"] = {
         "dtype": "float32",
         "shape": shape,
         "names": names
       }
     
-    if self.cfg.robotif_arm_cfg.use_joint_velocity:
+    if self.cfg.robotic_arm_cfg.use_joint_velocity:
       features["observation.velocity"] = {
         "dtype": "float32",
         "shape": shape,
@@ -124,10 +124,10 @@ class LRDataset:
         "action": action,
       }
       
-      if self.cfg.robotif_arm_cfg.use_joint_velocity:
+      if self.cfg.robotic_arm_cfg.use_joint_velocity:
         velocity = np.array(ts.observation["velocity"], dtype=np.float32)
         frame["observation.velocity"] = velocity
-      if self.cfg.robotif_arm_cfg.use_joint_effort:
+      if self.cfg.robotic_arm_cfg.use_joint_effort:
         effort = np.array(ts.observation["effort"], dtype=np.float32)
         frame["observation.effort"] = effort
       

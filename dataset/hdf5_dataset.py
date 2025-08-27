@@ -69,10 +69,10 @@ class H5Dataset:
       "/action": [],
     }
     
-    if self.cfg.robotif_arm_cfg.use_joint_effort:
+    if self.cfg.robotic_arm_cfg.use_joint_effort:
       data_dict["/observation/effort"] = []
     
-    if self.cfg.robotif_arm_cfg.use_joint_velocity:
+    if self.cfg.robotic_arm_cfg.use_joint_velocity:
       data_dict["/observation/velocity"] = []
     
     for cam_name in self.cfg.camera_cfg.camera_names:
@@ -83,15 +83,15 @@ class H5Dataset:
       ts = ts_copy.pop(0)
       data_dict["/observation/state"].append(ts.observation["state"])
       
-      if self.cfg.robotif_arm_cfg.use_joint_velocity:
+      if self.cfg.robotic_arm_cfg.use_joint_velocity:
         data_dict["/observation/velocity"].append(ts.observation["velocity"])
-      if self.cfg.robotif_arm_cfg.use_joint_effort:
+      if self.cfg.robotic_arm_cfg.use_joint_effort:
         data_dict["/observation/effort"].append(ts.observation["effort"])
       
       data_dict["/action"].append(action)
       
       for cam_name in self.cfg.camera_cfg.camera_names:
-        data_dict[f"/observation/images/{cam_name}"].append(ts.observation["cameras"][cam_name])
+        data_dict[f"/observation/images/{cam_name}"].append(np.frombuffer(ts.observation["cameras"][cam_name], dtype='uint8'))
         
     # save in hdf5 format
     start_time = time.time()
@@ -102,17 +102,18 @@ class H5Dataset:
       # save observation group
       obs = root.create_group("observation")
       obs.create_dataset("state", data=np.array(data_dict["/observation/state"], dtype=np.float32))
-      if self.cfg.robotif_arm_cfg.use_joint_velocity:
+      if self.cfg.robotic_arm_cfg.use_joint_velocity:
         obs.create_dataset("velocity", data=np.array(data_dict["/observation/velocity"], dtype=np.float32))
-      if self.cfg.robotif_arm_cfg.use_joint_effort:
+      if self.cfg.robotic_arm_cfg.use_joint_effort:
         obs.create_dataset("effort", data=np.array(data_dict["/observation/effort"], dtype=np.float32))
       
       # save images group
       images = obs.create_group("images")
+      vlen_dtype = h5py.special_dtype(vlen=np.dtype('uint8'))
       for cam_name in self.cfg.camera_cfg.camera_names:
         images.create_dataset(cam_name, 
-                              data=np.array(data_dict[f"/observation/images/{cam_name}"], 
-                              dtype=np.uint8))  
+                              data=data_dict[f"/observation/images/{cam_name}"], 
+                              dtype=vlen_dtype)
       
       # save action data
       root.create_dataset("action", data=np.array(data_dict["/action"], dtype=np.float32))

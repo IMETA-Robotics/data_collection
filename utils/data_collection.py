@@ -6,6 +6,7 @@ import collections
 import dm_env
 import numpy as np
 import cv2
+import time
 from cv_bridge import CvBridge
 from utils.key_handle import init_keyboard_listener
 
@@ -20,6 +21,7 @@ class DataCollection:
     self.img_dict = {}
     self.depth_dict = {}
     self.init_topic()
+    time.sleep(1)
     
   def init_topic(self):
     rospy.init_node("data_collection")
@@ -149,7 +151,7 @@ class DataCollection:
       
       frame["state"] = np.array(self.master_arm_right_state.joint_position)
       frame["action"] = np.array(self.master_arm_right_state.joint_position)
-      if self.cfg.roboti_arm_cfg.use_joint_velocity:
+      if self.cfg.robotic_arm_cfg.use_joint_velocity:
         frame["velocity"] = np.array(self.master_arm_right_state.joint_velocity)
       if self.cfg.robotic_arm_cfg.use_joint_effort:
         frame["effort"] = np.array(self.master_arm_right_state.joint_effort)

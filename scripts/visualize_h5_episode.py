@@ -16,8 +16,18 @@ def load_hdf5(dataset_dir, dataset_name):
     joint_position = root['/observation/state'][()]
     
     image_dict = dict()
-    for cam_name in root[f'/observation/images/'].keys():
-        image_dict[cam_name] = root[f'/observation/images/{cam_name}'][()]
+    images_grp = root['/observation/images/']
+    for cam_name in images_grp.keys():
+        img_bytes_seq = images_grp[cam_name][()]
+        # img_bytes_seq 可能是一个包含多帧字节的 NumPy 数组
+        frames = []
+        for frame_bytes in img_bytes_seq:
+            buf = np.frombuffer(frame_bytes, dtype=np.uint8)
+            img = cv2.imdecode(buf, cv2.IMREAD_UNCHANGED)
+            if img is None:
+                raise ValueError(f"Failed to decode frame from camera '{cam_name}'.")
+            frames.append(img)
+        image_dict[cam_name] = frames
     
     # action
     action = root['/action'][()]

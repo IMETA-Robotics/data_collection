@@ -1,5 +1,5 @@
 task_description: "y1 pick and place"
-num_episodes: 2
+num_episodes: 60
 save_rate: 30
 
 hdf5_cfg:

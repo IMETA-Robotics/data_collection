@@ -120,4 +120,4 @@ class H5Dataset:
     
     self.episode_idx += 1  
     print(f"Save episode to {dataset_path}.")
-    print(f"Save time: {time.time() - start_time:.1f} secs.")
+    print(f"Save time: {time.time() - start_time:.3f} secs.")

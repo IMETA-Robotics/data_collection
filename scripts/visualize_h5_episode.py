@@ -94,7 +94,7 @@ def save_video(image_dict: dict, video_fps: int, video_path: str):
   print(f"Start to save video, fps:{video_fps}, frames:{num_image}")
   for t in range(num_image):
     image = all_cam_images[t]
-    # opencv default is brg, change brg to rgb
+    # opencv default is brg, change rgb to bgr
     image = image[:, :, [2, 1, 0]]
     out.write(image)
     
@@ -110,6 +110,7 @@ def main(args):
   joint_position, image_dict, action = load_hdf5(dataset_dir, dataset_name)
   
   # save video
+  # NOTE: 这里的video_fps根据数采时的真实频率修改
   save_video(image_dict, 30, video_path=os.path.join(dataset_dir, dataset_name + "_video.mp4"))
   # visual joint position and action
   visualize_joints(joint_position, action, 

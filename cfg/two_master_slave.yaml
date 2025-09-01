@@ -9,8 +9,8 @@ hdf5_cfg:
 
 lerobot_dataset_cfg:
   save_as_lerobot: True
-  repo_id: "piper/two_arm_teleop"
-  robot_type: "piper"
+  repo_id: "y1/two_arm_teleop"
+  robot_type: "y1"
 
 robotic_arm_cfg:
   collection_type: "two_master_slave"

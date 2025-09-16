@@ -12,6 +12,8 @@ import tyro
 import shutil
 import h5py
 import tqdm
+import numpy as np
+import cv2
 from dataclasses import dataclass
 from pathlib import Path
 from lerobot.constants import HF_LEROBOT_HOME
@@ -72,8 +74,18 @@ class LoadH5Dataset:
       # episode_data["effort"] = root['/observation/effort'][()]
       # cameras
       cameras = {}
-      for cam_name in root[f'/observation/images/'].keys():
-        cameras[cam_name] = root[f'/observation/images/{cam_name}'][()]
+      images_grp = root['/observation/images/']
+      for cam_name in images_grp.keys():
+        img_bytes_seq = images_grp[cam_name][()]
+        # img_bytes_seq 可能是一个包含多帧字节的 NumPy 数组
+        frames = []
+        for frame_bytes in img_bytes_seq:
+            buf = np.frombuffer(frame_bytes, dtype=np.uint8)
+            img = cv2.imdecode(buf, cv2.IMREAD_UNCHANGED)
+            if img is None:
+                raise ValueError(f"Failed to decode frame from camera '{cam_name}'.")
+            frames.append(img)
+        cameras[cam_name] = frames
         
       episode_data["cameras"] = cameras
       
@@ -82,6 +94,9 @@ class LoadH5Dataset:
       
       # episode length
       episode_data["episode_length"] = len(root['/observation/state'][()])
+      
+      # task description
+      episode_data["task_description"] = root.attrs['task']
     
     return episode_data
   
@@ -89,8 +104,8 @@ def create_empty_dataset(config: CovertConfig) -> LeRobotDataset:
   # features
   features = {}
   names = ["J1", "J2", "J3", "J4", "J5", "J6", "Gripper"]
-  cameras = ["cam_right_wrist", "cam_front"]
-  
+  # cameras = ["cam_right_wrist", "cam_front"]
+  cameras = ["cam_front"]
   # state
   features["observation.state"] = {
     "dtype": "float32",
@@ -148,7 +163,7 @@ def h5_to_lerobot(config: CovertConfig, dataset: LeRobotDataset) -> LeRobotDatas
     cameras = episode["cameras"]
     action =episode["action"]
     episode_length = episode["episode_length"]
-    task = "piper_pick_and_place"
+    task = episode["task_description"]
     
     for j in range(episode_length):
       frame = {

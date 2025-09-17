@@ -1,5 +1,5 @@
-task_description: "two_arm_teleop"
-num_episodes: 2
+task_description: "pick and place"
+num_episodes: 100
 save_rate: 30
 
 hdf5_cfg:
@@ -8,7 +8,7 @@ hdf5_cfg:
   task_name: "two_arm_teleop"
 
 lerobot_dataset_cfg:
-  save_as_lerobot: True
+  save_as_lerobot: False
   repo_id: "y1/two_arm_teleop"
   robot_type: "y1"
 

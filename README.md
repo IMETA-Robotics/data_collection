@@ -3,6 +3,8 @@
 - Ubuntu 20.04 LTS
 - ROS Noetic
 
+# 详细使用文档 [Y1数据采集使用说明](https://p05rcnnjwft.feishu.cn/wiki/HU69wkBepiheMWk5yjKcRvq0n2f)
+
 # 1. Software installation
 Choose one of the following two methods
 ## 1.1 Conda:

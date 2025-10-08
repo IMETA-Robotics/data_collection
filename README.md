@@ -20,7 +20,8 @@ Choose one of the following two methods
 
 ## 1.2 or create conda environment:
   ```sh
-  conda env create -f conda_environment.yml
+  conda env create -f conda_environment.yaml
+  conda activate imeta_data_collection
   ```
 
 # 2. Data collection:
@@ -31,14 +32,20 @@ Choose one of the following two methods
 | -------- | -------------------------------- |
 | S(s)     | Start collect current episode    |  
 | E(e)     | End and save current episode     |
-| R(r)     | Restart collect cuurent episode  |
+| R(r)     | Restart collect current episode  |
 | Q(q)     | exit
 
 ## 2.1 collecte data with hdf5 format
 
-source the ros env first, because we use rosmsg in data collection:
+source the ros env first, because we use rosmsg in data collection.
+if you use python sdk:
   ```sh
-  cd y1_ros/
+  cd y1_sdk_python/y1_ros
+  source devel/setup.bash
+  ```
+if you use c++ sdk:
+  ```sh
+  cd y1_sdk
   source devel/setup.bash
   ```
 
@@ -142,5 +149,7 @@ Refer to the script of lerobot:
 # you can use h5dump to view hdf5 data: 
 Show only the file structure (no data):  
   ```sh
+  sudo apt install hdf5-tools
+  
   h5dump -H example.h5
   ```

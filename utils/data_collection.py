@@ -1,5 +1,5 @@
 from utils.data_collection_cfg import DataCollectionCfg
-from imeta_y1_msg.msg import ArmJointState
+from y1_msg.msg import ArmJointState
 from sensor_msgs.msg import Image
 import rospy
 import collections

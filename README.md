@@ -1,26 +1,14 @@
 # Software Dependency
 
-- Ubuntu 20.04 LTS
-- ROS Noetic
+- Ubuntu 22.04 LTS
+- ROS2 Humble
 
 # 1. Software installation
-Choose one of the following two methods
-## 1.1 Conda:
-    conda create -n imeta_data_collection python=3.8.10
-    conda activate imeta_data_collection
-    
-    pip install numpy
-    pip install rospkg
-    pip install opencv-python
-    pip install omegaconf
-    pip install pynput
-    pip install dm_env
-    pip install h5py
-    pip install matplotlib
-
-## 1.2 or create conda environment:
+## create conda environment:
   ```sh
-  conda env create -f conda_environment.yml
+  conda env create -f conda_environment.yaml
+  conda activate imeta_data_collection
+  pip install "numpy<2"
   ```
 
 # 2. Data collection:
@@ -36,10 +24,16 @@ Choose one of the following two methods
 
 ## 2.1 collecte data with hdf5 format
 
-source the ros env first, because we use rosmsg in data collection:
+source the ros env first, because we use rosmsg in data collection. 
+if you use python sdk:
   ```sh
-  cd y1_ros/
-  source devel/setup.bash
+  cd y1_sdk_python/y1_ros2/
+  source install/setup.bash
+  ```
+if you use c++ sdk:
+  ```sh
+  cd y1_sdk/
+  source install/setup.bash
   ```
 
 if you have only one master arm: 

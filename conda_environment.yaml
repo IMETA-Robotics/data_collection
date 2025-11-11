@@ -2,11 +2,11 @@ name: imeta_data_collection
 channels:
   - defaults
 dependencies:
-  - python=3.8.10
+  - python=3.10
   - pip
   - pip:
     - numpy
-    - rospkg
+    # - rospkg
     - opencv-python
     - omegaconf
     - pynput

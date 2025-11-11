@@ -17,5 +17,5 @@ robotic_arm_cfg:
   master_arm_right_topic: "/master_arm_right/joint_states"
 
 camera_cfg:
-  camera_names: ["cam_front"]
-  img_front_topic: "/camera_front/color/image_raw"
+  camera_names: ["cam_right_wrist"]
+  img_right_topic: "/camera_right/color/image_raw"

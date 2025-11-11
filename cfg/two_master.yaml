@@ -5,11 +5,11 @@ save_rate: 30
 hdf5_cfg:
   save_as_h5: True
   dataset_dir: "data/"
-  task_name: "y1_place_and_place_0827"
+  task_name: "y1_pick_and_place"
 
 lerobot_dataset_cfg:
   save_as_lerobot: False
-  repo_id: "y1/place_and_place_0827"
+  repo_id: "y1/place_and_place"
   robot_type: "y1"
 
 robotic_arm_cfg:
@@ -18,5 +18,7 @@ robotic_arm_cfg:
   master_arm_left_topic: "/master_arm_left/joint_states"
 
 camera_cfg:
-  camera_names: ["cam_front"]
+  camera_names: ["cam_right_wrist", "cam_front", "came_left_wrist"]
+  img_right_topic: "/camera_right/color/image_raw"
+  img_left_topic: "/camera_left/color/image_raw"
   img_front_topic: "/camera_front/color/image_raw"

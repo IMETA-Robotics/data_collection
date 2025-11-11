@@ -22,5 +22,8 @@ def main():
   # start collection
   data_collection.run()
 
+  # destroy node
+  data_collection.destroy_node()
+
 if __name__ == '__main__':
   main()

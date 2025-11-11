@@ -1,7 +1,7 @@
 from utils.data_collection_cfg import DataCollectionCfg
-from imeta_y1_msg.msg import ArmJointState
+from y1_msg.msg import ArmJointState
 from sensor_msgs.msg import Image
-import rospy
+# import rospy
 import collections
 import dm_env
 import numpy as np
@@ -10,82 +10,110 @@ import time
 from cv_bridge import CvBridge
 from utils.key_handle import init_keyboard_listener
 
-class DataCollection:
+import rclpy
+from rclpy.node import Node
+
+class DataCollection(Node):
   def __init__(self, cfg: DataCollectionCfg):
+    # 确保rclpy已初始化
+    if not rclpy.ok():
+      rclpy.init()
+
+    super().__init__('data_collection_node')
     self.cfg = cfg
     self.bridge = CvBridge()
     self.master_arm_right_state = None
     self.master_arm_left_state = None
     self.puppet_arm_right_state = None
     self.puppet_arm_left_state = None
-    self.img_dict = {}
+    self.img_dict = {"cam_right_wrist": None,
+                     "cam_left_wrist": None,
+                     "cam_front": None,
+                     "cam_top": None}
     self.depth_dict = {}
-    self.init_topic()
+
+    # 初始化订阅
+    self.init_subscriptions()
     time.sleep(1)
+
+  def destroy(self):
+    self.destroy_node()
+    rclpy.shutdown()
     
-  def init_topic(self):
-    rospy.init_node("data_collection")
+  def init_subscriptions(self):
     # subscribe robotic arm data
     robotic_arm_cfg = self.cfg.robotic_arm_cfg
     if robotic_arm_cfg.master_arm_right_topic is not None:
-      rospy.Subscriber(robotic_arm_cfg.master_arm_right_topic,
-            ArmJointState, self.master_arm_right_callback, queue_size=1, tcp_nodelay=True)
+        self.create_subscription(
+            ArmJointState,
+            robotic_arm_cfg.master_arm_right_topic,
+            self.master_arm_right_callback,
+            1)
     
     if robotic_arm_cfg.master_arm_left_topic is not None:
-      rospy.Subscriber(robotic_arm_cfg.master_arm_left_topic,
-          ArmJointState, self.master_arm_left_callback, queue_size=1, tcp_nodelay=True)
+        self.create_subscription(
+            ArmJointState,
+            robotic_arm_cfg.master_arm_left_topic,
+            self.master_arm_left_callback,
+            1)
     
     if robotic_arm_cfg.puppet_arm_right_topic is not None:
-      rospy.Subscriber(robotic_arm_cfg.puppet_arm_right_topic,
-        ArmJointState, self.puppet_arm_right_callback, queue_size=1, tcp_nodelay=True)
+        self.create_subscription(
+            ArmJointState,
+            robotic_arm_cfg.puppet_arm_right_topic,
+            self.puppet_arm_right_callback,
+            1)
         
     if robotic_arm_cfg.puppet_arm_left_topic is not None:
-      rospy.Subscriber(robotic_arm_cfg.puppet_arm_left_topic,
-        ArmJointState, self.puppet_arm_left_callback, queue_size=1, tcp_nodelay=True)
+        self.create_subscription(
+            ArmJointState,
+            robotic_arm_cfg.puppet_arm_left_topic,
+            self.puppet_arm_left_callback,
+            1)
       
     # subscribe camera rgb data
     camera_cfg = self.cfg.camera_cfg
     if camera_cfg.img_right_topic:
-      # right arm wrist camera rgb image
-      rospy.Subscriber(camera_cfg.img_right_topic, 
-        Image, self.img_right_callback, queue_size=1, tcp_nodelay=True)
+        # right arm wrist camera rgb image
+        self.create_subscription(
+            Image, camera_cfg.img_right_topic, self.img_right_callback, 1)
     
     if camera_cfg.img_left_topic:
-      # left arm wrist camera rgb image
-      rospy.Subscriber(camera_cfg.img_left_topic, 
-        Image, self.img_left_callback, queue_size=1, tcp_nodelay=True)
+        # left arm wrist camera rgb image
+        self.create_subscription(
+            Image, camera_cfg.img_left_topic, self.img_left_callback, 1)
       
     if camera_cfg.img_front_topic:
-      # front external camera rgb image
-      rospy.Subscriber(camera_cfg.img_front_topic, 
-        Image, self.img_front_callback, queue_size=1, tcp_nodelay=True)
+        # front external camera rgb image
+        self.create_subscription(
+            Image, camera_cfg.img_front_topic, self.img_front_callback, 1)
       
     if camera_cfg.img_top_topic:
-      # top external camera rgb image
-      rospy.Subscriber(camera_cfg.img_top_topic, 
-        Image, self.img_top_callback, queue_size=1, tcp_nodelay=True)
+        # top external camera rgb image
+        self.create_subscription(
+            Image, camera_cfg.img_top_topic, self.img_top_callback, 1)
       
     # subscribe camera depth data
     if camera_cfg.depth_right_topic:
-      # right arm wrist camera depth image
-      rospy.Subscriber(camera_cfg.depth_right_topic, 
-        Image, self.depth_right_callback, queue_size=1, tcp_nodelay=True)
+        # right arm wrist camera depth image
+        self.create_subscription(
+            Image, camera_cfg.depth_right_topic, self.depth_right_callback, 1)
     
     if camera_cfg.depth_left_topic:
-      # left arm wrist camera depth image
-      rospy.Subscriber(camera_cfg.depth_left_topic, 
-        Image, self.depth_left_callback, queue_size=1, tcp_nodelay=True)
+        # left arm wrist camera depth image
+        self.create_subscription(
+            Image, camera_cfg.depth_left_topic, self.depth_left_callback, 1)
       
     if camera_cfg.depth_front_topic:
-      # front external camera depth image
-      rospy.Subscriber(camera_cfg.depth_front_topic, 
-        Image, self.depth_front_callback, queue_size=1, tcp_nodelay=True)
+        # front external camera depth image
+        self.create_subscription(
+            Image, camera_cfg.depth_front_topic, self.depth_front_callback, 1)
       
     if camera_cfg.depth_top_topic:
-      # top external camera depth image
-      rospy.Subscriber(camera_cfg.depth_right_topic, 
-        Image, self.depth_right_callback, queue_size=1, tcp_nodelay=True)
-      
+        # top external camera depth image
+        self.create_subscription(
+            Image, camera_cfg.depth_top_topic, self.depth_top_callback, 1)
+
   def master_arm_right_callback(self, msg: ArmJointState):
     self.master_arm_right_state = msg 
     
@@ -246,25 +274,38 @@ class DataCollection:
     return frame
     
   def collect(self, events: dict):
-    rate = rospy.Rate(self.cfg.save_rate)
+    target_period = 1.0 / self.cfg.save_rate
+
     timesteps = []
     actions = []
     first_step = True
+    get_frame = False
     
-    while not rospy.is_shutdown():
+    while rclpy.ok():
+      loop_start = time.time()
+      rclpy.spin_once(self, timeout_sec=0.02)
+
       if events["finish_current_recording"]:
         events["finish_current_recording"] = False
         break
       
       if events["stop_recording"]:
         print("Exit program!")
+        rclpy.shutdown()
         exit(1)
       
       frame = self.get_frame() 
       if not frame:
         print("get frame failed!")
-        rate.sleep()
+
+        elapsed = time.time() - loop_start
+        sleep_time = target_period - elapsed
+        time.sleep(sleep_time)
+
         continue
+      elif get_frame is False:
+        print("get frame success!")
+        get_frame = True
       
       # observation
       obs = collections.OrderedDict()
@@ -290,23 +331,25 @@ class DataCollection:
           observation=obs
         )
         timesteps.append(ts)
-        continue
+      else:
+        ts = dm_env.TimeStep(
+          step_type=dm_env.StepType.MID,
+          reward=None,
+          discount=None,
+          observation=obs
+        )
+        
+        timesteps.append(ts)
+        actions.append(frame["action"])
       
-      ts = dm_env.TimeStep(
-        step_type=dm_env.StepType.MID,
-        reward=None,
-        discount=None,
-        observation=obs
-      )
+      elapsed = time.time() - loop_start
+      sleep_time = target_period - elapsed
+      time.sleep(sleep_time)
       
-      timesteps.append(ts)
-      actions.append(frame["action"])
-      rate.sleep()
-      
-    # ctrl-c exit the program  
-    if rospy.is_shutdown():
+    # ctrl-c exit the program 
+    if not rclpy.ok(): 
         print("Exit program!")
-        exit(-1)
+        exit(1)
       
     return timesteps, actions
     

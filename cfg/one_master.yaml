@@ -1,21 +1,16 @@
-task_description: "y1 pick and place"
+task_description: "pick and place two water bottle"
 num_episodes: 60
 save_rate: 30
 
 hdf5_cfg:
-  save_as_h5: True
   dataset_dir: "data/"
-  task_name: "y1_place_and_place_0827"
-
-lerobot_dataset_cfg:
-  save_as_lerobot: False
-  repo_id: "y1/place_and_place_0827"
-  robot_type: "y1"
+  task_name: "pick_two_water_bottle_20251215"
 
 robotic_arm_cfg:
   collection_type: "one_master"
   master_arm_right_topic: "/master_arm_right/joint_states"
 
 camera_cfg:
-  camera_names: ["cam_front"]
-  img_front_topic: "/camera_front/color/image_raw"
+  camera_names: ["cam_high", "cam_right_wrist"]
+  img_high_topic: "/camera_high/color/image_raw"
+  img_right_topic: "/camera_right/color/image_raw"

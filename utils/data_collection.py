@@ -1,4 +1,5 @@
 from utils.data_collection_cfg import DataCollectionCfg
+from dataset.hdf5_dataset import H5Dataset
 from y1_msg.msg import ArmJointState
 from sensor_msgs.msg import Image
 import rospy
@@ -55,15 +56,15 @@ class DataCollection:
       rospy.Subscriber(camera_cfg.img_left_topic, 
         Image, self.img_left_callback, queue_size=1, tcp_nodelay=True)
       
-    if camera_cfg.img_front_topic:
+    if camera_cfg.img_high_topic:
       # front external camera rgb image
-      rospy.Subscriber(camera_cfg.img_front_topic, 
-        Image, self.img_front_callback, queue_size=1, tcp_nodelay=True)
+      rospy.Subscriber(camera_cfg.img_high_topic, 
+        Image, self.img_high_callback, queue_size=1, tcp_nodelay=True)
       
-    if camera_cfg.img_top_topic:
+    if camera_cfg.img_low_topic:
       # top external camera rgb image
-      rospy.Subscriber(camera_cfg.img_top_topic, 
-        Image, self.img_top_callback, queue_size=1, tcp_nodelay=True)
+      rospy.Subscriber(camera_cfg.img_low_topic, 
+        Image, self.img_low_callback, queue_size=1, tcp_nodelay=True)
       
     # subscribe camera depth data
     if camera_cfg.depth_right_topic:
@@ -76,15 +77,15 @@ class DataCollection:
       rospy.Subscriber(camera_cfg.depth_left_topic, 
         Image, self.depth_left_callback, queue_size=1, tcp_nodelay=True)
       
-    if camera_cfg.depth_front_topic:
+    if camera_cfg.depth_high_topic:
       # front external camera depth image
-      rospy.Subscriber(camera_cfg.depth_front_topic, 
-        Image, self.depth_front_callback, queue_size=1, tcp_nodelay=True)
+      rospy.Subscriber(camera_cfg.depth_high_topic, 
+        Image, self.depth_high_callback, queue_size=1, tcp_nodelay=True)
       
-    if camera_cfg.depth_top_topic:
+    if camera_cfg.depth_low_topic:
       # top external camera depth image
-      rospy.Subscriber(camera_cfg.depth_right_topic, 
-        Image, self.depth_right_callback, queue_size=1, tcp_nodelay=True)
+      rospy.Subscriber(camera_cfg.depth_low_topic, 
+        Image, self.depth_low_callback, queue_size=1, tcp_nodelay=True)
       
   def master_arm_right_callback(self, msg: ArmJointState):
     self.master_arm_right_state = msg 
@@ -112,19 +113,19 @@ class DataCollection:
     if ret:
       self.img_dict["cam_left_wrist"] = buf.tobytes()
     
-  def img_front_callback(self, msg: Image):
+  def img_high_callback(self, msg: Image):
     cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
     # 编码为 JPEG 格式的二进制数据
     ret, buf = cv2.imencode('.jpg', cv_image)
     if ret:
-      self.img_dict["cam_front"] = buf.tobytes()
+      self.img_dict["cam_high"] = buf.tobytes()
     
-  def img_top_callback(self, msg: Image):
+  def img_low_callback(self, msg: Image):
     cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
     # 编码为 JPEG 格式的二进制数据
     ret, buf = cv2.imencode('.jpg', cv_image)
     if ret:
-      self.img_dict["cam_top"] = buf.tobytes()
+      self.img_dict["cam_low"] = buf.tobytes()
     
   def depth_right_callback(self, msg: Image):
     self.depth_right = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
@@ -132,11 +133,11 @@ class DataCollection:
   def depth_left_callback(self, msg: Image):
     self.depth_left = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
     
-  def depth_front_callback(self, msg: Image):
-    self.depth_front = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+  def depth_high_callback(self, msg: Image):
+    self.depth_high = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
     
-  def depth_top_callback(self, msg: Image):
-    self.depth_top = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+  def depth_low_callback(self, msg: Image):
+    self.depth_low = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
     
   def get_frame(self):
     """Get all the data of a frame"""
@@ -232,11 +233,11 @@ class DataCollection:
       if cam_name == "cam_left_wrist" and self.img_dict["cam_left_wrist"] is None:
         print("Not receive left image data!")
         return False
-      if cam_name == "cam_front" and self.img_dict["cam_front"] is None:
-        print("Not receive front image data!")
+      if cam_name == "cam_high" and self.img_dict["cam_high"] is None:
+        print("Not receive high image data!")
         return False
-      if cam_name == "cam_top" and self.img_dict["cam_top"] is None:
-        print("Not receive top image data!")
+      if cam_name == "cam_low" and self.img_dict["cam_low"] is None:
+        print("Not receive low image data!")
         return False
       
       cameras[cam_name] = self.img_dict[cam_name]
@@ -314,15 +315,7 @@ class DataCollection:
     if self.cfg.num_episodes < 1:
       raise ValueError("num_episodes must be greater than 0")
     
-    # whether save data as hdf5
-    if self.cfg.hdf5_cfg.save_as_h5:
-      from dataset.hdf5_dataset import H5Dataset
-      h5_dataset = H5Dataset(self.cfg)
-    
-    # whether save data as lerobot dataset
-    if self.cfg.lerobot_dataset_cfg.save_as_lerobot:
-      from dataset.lerobot_dataset import LRDataset
-      lerobot_dataset = LRDataset(self.cfg)
+    h5_dataset = H5Dataset(self.cfg)
     
     # start_e_listener()
     listener, events = init_keyboard_listener()
@@ -355,12 +348,7 @@ class DataCollection:
         continue
       
       # save as hdf5
-      if self.cfg.hdf5_cfg.save_as_h5:
-        h5_dataset.save_to_hdf5(timesteps, actions)
-        
-      # save as lerobotdatset
-      if self.cfg.lerobot_dataset_cfg.save_as_lerobot:
-        lerobot_dataset.save_to_lerobot(timesteps, actions)
+      h5_dataset.save_to_hdf5(timesteps, actions)
       
       count += 1 
       

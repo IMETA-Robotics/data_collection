@@ -3,14 +3,8 @@ num_episodes: 60
 save_rate: 30
 
 hdf5_cfg:
-  save_as_h5: True
   dataset_dir: "data/"
   task_name: "y1_place_and_place_0729"
-
-lerobot_dataset_cfg:
-  save_as_lerobot: False
-  repo_id: "y1/place_and_place_0729"
-  robot_type: "y1"
 
 robotic_arm_cfg:
   collection_type: "one_master_slave"
@@ -18,6 +12,6 @@ robotic_arm_cfg:
   puppet_arm_right_topic: "/puppet_arm_right/joint_states"
 
 camera_cfg:
-  camera_names: ["cam_right_wrist", "cam_front"]
+  camera_names: ["cam_right_wrist", "cam_high"]
   img_right_topic: "/camera_right/color/image_raw"
-  img_front_topic: "/camera_front/color/image_raw"
+  img_high_topic: "/camera_high/color/image_raw"

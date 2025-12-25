@@ -5,9 +5,6 @@ from pathlib import Path
 
 @dataclass
 class Hdf5Cfg:
-  save_as_h5: bool  = False
-  """The data saved in hdf5 format."""
-  
   dataset_dir: Optional[str] = None
   """Directory to save the dataset."""
   
@@ -15,30 +12,6 @@ class Hdf5Cfg:
   """Task name."""
   
   start_episode: Optional[int] = None
-  
-@dataclass
-class LeRobotDatasetCfg:
-  save_as_lerobot: bool = True
-  """The data is saved in LeRobotDataset format."""
-  
-  repo_id: Optional[str] = None
-  robot_type: str = "IMETA_Y1"
-  push_to_hub: bool = False
-  resume: bool = False
-  root: Optional[Path] = None
-  """Root directory where the dataset will be stored (e.g. 'dataset/path')."""
-  
-  use_video: bool = True
-  tolerance_s: float = 0.0001
-  num_image_writer_processes: int = 2
-  """ Number of subprocesses handling the saving of frames as PNG. Set to 0 to use threads only;
-    set to ≥1 to use subprocesses, each using threads to write images. The best number of processes
-    and threads depends on your system. We recommend 4 threads per camera with 0 processes.
-    If fps is unstable, adjust the thread count. If still unstable, try using 1 or more subprocesses."""
-  num_image_writer_threads_per_camera: int = 5
-  """ Number of threads writing the frames as png images on disk, per camera.
-    Too many threads might cause unstable teleoperation fps due to main thread being blocked.
-    Not enough threads might cause low camera fps."""
 
 @dataclass
 class RoboticArmCfg:
@@ -81,11 +54,11 @@ class CameraCfg:
   img_left_topic: Optional[str] = None
   """left camera rgb image topic"""
   
-  img_front_topic: Optional[str] = None
-  """front camera rgb image topic"""
+  img_high_topic: Optional[str] = None
+  """high camera rgb image topic"""
   
-  img_top_topic: Optional[str] = None
-  """top camera rgb image topic"""
+  img_low_topic: Optional[str] = None
+  """low camera rgb image topic"""
   
   depth_right_topic: Optional[str] = None
   """right camera depth image topic"""
@@ -93,11 +66,11 @@ class CameraCfg:
   depth_left_topic: Optional[str] = None
   """left camera depth image topic"""
   
-  depth_front_topic: Optional[str] = None
-  """front camera depth image topic"""
+  depth_high_topic: Optional[str] = None
+  """high camera depth image topic"""
   
-  depth_top_topic: Optional[str] = None
-  """top camera depth image topic"""
+  depth_low_topic: Optional[str] = None
+  """low camera depth image topic"""
 
 @dataclass
 class DataCollectionCfg:
@@ -113,9 +86,6 @@ class DataCollectionCfg:
   
   hdf5_cfg: Hdf5Cfg = Hdf5Cfg()
   """Configuration for save data as hdf5."""
-  
-  lerobot_dataset_cfg: LeRobotDatasetCfg = LeRobotDatasetCfg()
-  """Configuration for save data as lerobot dataset."""
   
   robotic_arm_cfg: RoboticArmCfg = RoboticArmCfg()
   """Configuration for robotic arm."""

@@ -1,7 +1,7 @@
 from utils.data_collection_cfg import DataCollectionCfg
+from dataset.hdf5_dataset import H5Dataset
 from y1_msg.msg import ArmJointState
 from sensor_msgs.msg import Image
-# import rospy
 import collections
 import dm_env
 import numpy as np
@@ -28,8 +28,8 @@ class DataCollection(Node):
     self.puppet_arm_left_state = None
     self.img_dict = {"cam_right_wrist": None,
                      "cam_left_wrist": None,
-                     "cam_front": None,
-                     "cam_top": None}
+                     "cam_high": None,
+                     "cam_low": None}
     self.depth_dict = {}
 
     # 初始化订阅
@@ -83,15 +83,15 @@ class DataCollection(Node):
         self.create_subscription(
             Image, camera_cfg.img_left_topic, self.img_left_callback, 1)
       
-    if camera_cfg.img_front_topic:
-        # front external camera rgb image
+    if camera_cfg.img_high_topic:
+        # high external camera rgb image
         self.create_subscription(
-            Image, camera_cfg.img_front_topic, self.img_front_callback, 1)
+            Image, camera_cfg.img_high_topic, self.img_high_callback, 1)
       
-    if camera_cfg.img_top_topic:
-        # top external camera rgb image
+    if camera_cfg.img_low_topic:
+        # low external camera rgb image
         self.create_subscription(
-            Image, camera_cfg.img_top_topic, self.img_top_callback, 1)
+            Image, camera_cfg.img_low_topic, self.img_low_callback, 1)
       
     # subscribe camera depth data
     if camera_cfg.depth_right_topic:
@@ -104,15 +104,15 @@ class DataCollection(Node):
         self.create_subscription(
             Image, camera_cfg.depth_left_topic, self.depth_left_callback, 1)
       
-    if camera_cfg.depth_front_topic:
-        # front external camera depth image
+    if camera_cfg.depth_high_topic:
+        # high external camera depth image
         self.create_subscription(
-            Image, camera_cfg.depth_front_topic, self.depth_front_callback, 1)
+            Image, camera_cfg.depth_high_topic, self.depth_high_callback, 1)
       
-    if camera_cfg.depth_top_topic:
-        # top external camera depth image
+    if camera_cfg.depth_low_topic:
+        # low external camera depth image
         self.create_subscription(
-            Image, camera_cfg.depth_top_topic, self.depth_top_callback, 1)
+            Image, camera_cfg.depth_low_topic, self.depth_low_callback, 1)
 
   def master_arm_right_callback(self, msg: ArmJointState):
     self.master_arm_right_state = msg 
@@ -140,19 +140,19 @@ class DataCollection(Node):
     if ret:
       self.img_dict["cam_left_wrist"] = buf.tobytes()
     
-  def img_front_callback(self, msg: Image):
+  def img_high_callback(self, msg: Image):
     cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
     # 编码为 JPEG 格式的二进制数据
     ret, buf = cv2.imencode('.jpg', cv_image)
     if ret:
-      self.img_dict["cam_front"] = buf.tobytes()
+      self.img_dict["cam_high"] = buf.tobytes()
     
-  def img_top_callback(self, msg: Image):
+  def img_low_callback(self, msg: Image):
     cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
     # 编码为 JPEG 格式的二进制数据
     ret, buf = cv2.imencode('.jpg', cv_image)
     if ret:
-      self.img_dict["cam_top"] = buf.tobytes()
+      self.img_dict["cam_low"] = buf.tobytes()
     
   def depth_right_callback(self, msg: Image):
     self.depth_right = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
@@ -160,11 +160,11 @@ class DataCollection(Node):
   def depth_left_callback(self, msg: Image):
     self.depth_left = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
     
-  def depth_front_callback(self, msg: Image):
-    self.depth_front = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+  def depth_high_callback(self, msg: Image):
+    self.depth_high = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
     
-  def depth_top_callback(self, msg: Image):
-    self.depth_top = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+  def depth_low_callback(self, msg: Image):
+    self.depth_low = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
     
   def get_frame(self):
     """Get all the data of a frame"""
@@ -193,16 +193,16 @@ class DataCollection(Node):
         print("Not receive master_arm_left_state data!")
         return False
       
-      frame["state"] = np.concatenate([self.master_arm_right_state.joint_position,
-                                 self.master_arm_left_state.joint_position])
-      frame["action"] = np.concatenate([self.master_arm_right_state.joint_position,
-                                 self.master_arm_left_state.joint_position])
+      frame["state"] = np.concatenate([self.master_arm_left_state.joint_position,
+                                 self.master_arm_right_state.joint_position])
+      frame["action"] = np.concatenate([self.master_arm_left_state.joint_position,
+                                 self.master_arm_right_state.joint_position])
       if self.cfg.robotic_arm_cfg.use_joint_velocity:
-        frame["velocity"] = np.concatenate([self.master_arm_right_state.joint_velocity,
-                                 self.master_arm_left_state.joint_velocity])
+        frame["velocity"] = np.concatenate([self.master_arm_left_state.joint_velocity,
+                                 self.master_arm_right_state.joint_velocity])
       if self.cfg.robotic_arm_cfg.use_joint_effort:
-        frame["effort"] = np.concatenate([self.master_arm_right_state.joint_effort,
-                                 self.master_arm_left_state.joint_effort])
+        frame["effort"] = np.concatenate([self.master_arm_left_state.joint_effort,
+                                 self.master_arm_right_state.joint_effort])
     elif self.cfg.robotic_arm_cfg.collection_type == "one_master_slave":
       # 单臂主从数采, 默认为右臂
       if self.master_arm_right_state is None:
@@ -237,16 +237,16 @@ class DataCollection(Node):
         print("Not receive puppet_arm_left_state data!")
         return False
       
-      frame["state"] = np.concatenate([self.puppet_arm_right_state.joint_position,
-                                      self.puppet_arm_left_state.joint_position])
-      frame["action"] = np.concatenate([self.master_arm_right_state.joint_position,
-                                 self.master_arm_left_state.joint_position])
+      frame["state"] = np.concatenate([self.puppet_arm_left_state.joint_position,
+                                      self.puppet_arm_right_state.joint_position])
+      frame["action"] = np.concatenate([self.master_arm_left_state.joint_position,
+                                 self.master_arm_right_state.joint_position])
       if self.cfg.robotic_arm_cfg.use_joint_velocity:
-        frame["velocity"] = np.concatenate([self.puppet_arm_right_state.joint_velocity,
-                                              self.puppet_arm_left_state.joint_velocity])
+        frame["velocity"] = np.concatenate([self.puppet_arm_left_state.joint_velocity,
+                                              self.puppet_arm_right_state.joint_velocity])
       if self.cfg.robotic_arm_cfg.use_joint_effort:
-        frame["effort"] = np.concatenate([self.puppet_arm_right_state.joint_effort,
-                                          self.puppet_arm_left_state.joint_effort])
+        frame["effort"] = np.concatenate([self.puppet_arm_left_state.joint_effort,
+                                          self.puppet_arm_right_state.joint_effort])
       
     else:
       print(f"Unsupport collection type: {self.cfg.robotic_arm_cfg.collection_type}")
@@ -260,11 +260,11 @@ class DataCollection(Node):
       if cam_name == "cam_left_wrist" and self.img_dict["cam_left_wrist"] is None:
         print("Not receive left image data!")
         return False
-      if cam_name == "cam_front" and self.img_dict["cam_front"] is None:
-        print("Not receive front image data!")
+      if cam_name == "cam_high" and self.img_dict["cam_high"] is None:
+        print("Not receive high image data!")
         return False
-      if cam_name == "cam_top" and self.img_dict["cam_top"] is None:
-        print("Not receive top image data!")
+      if cam_name == "cam_low" and self.img_dict["cam_low"] is None:
+        print("Not receive low image data!")
         return False
       
       cameras[cam_name] = self.img_dict[cam_name]
@@ -282,8 +282,8 @@ class DataCollection(Node):
     get_frame = False
     
     while rclpy.ok():
-      loop_start = time.time()
-      rclpy.spin_once(self, timeout_sec=0.02)
+      loop_start_time = time.perf_counter()
+      rclpy.spin_once(self, timeout_sec=0.01)
 
       if events["finish_current_recording"]:
         events["finish_current_recording"] = False
@@ -297,12 +297,10 @@ class DataCollection(Node):
       frame = self.get_frame() 
       if not frame:
         print("get frame failed!")
-
-        elapsed = time.time() - loop_start
-        sleep_time = target_period - elapsed
-        time.sleep(sleep_time)
-
+        # Maintain frequency
+        time.sleep(max(0, target_period - (time.perf_counter() - loop_start_time)))
         continue
+
       elif get_frame is False:
         print("get frame success!")
         get_frame = True
@@ -342,9 +340,8 @@ class DataCollection(Node):
         timesteps.append(ts)
         actions.append(frame["action"])
       
-      elapsed = time.time() - loop_start
-      sleep_time = target_period - elapsed
-      time.sleep(sleep_time)
+      # Maintain frequency
+      time.sleep(max(0, target_period - (time.perf_counter() - loop_start_time)))
       
     # ctrl-c exit the program 
     if not rclpy.ok(): 
@@ -357,15 +354,7 @@ class DataCollection(Node):
     if self.cfg.num_episodes < 1:
       raise ValueError("num_episodes must be greater than 0")
     
-    # whether save data as hdf5
-    if self.cfg.hdf5_cfg.save_as_h5:
-      from dataset.hdf5_dataset import H5Dataset
-      h5_dataset = H5Dataset(self.cfg)
-    
-    # whether save data as lerobot dataset
-    if self.cfg.lerobot_dataset_cfg.save_as_lerobot:
-      from dataset.lerobot_dataset import LRDataset
-      lerobot_dataset = LRDataset(self.cfg)
+    h5_dataset = H5Dataset(self.cfg)
     
     # start_e_listener()
     listener, events = init_keyboard_listener()
@@ -398,12 +387,7 @@ class DataCollection(Node):
         continue
       
       # save as hdf5
-      if self.cfg.hdf5_cfg.save_as_h5:
-        h5_dataset.save_to_hdf5(timesteps, actions)
-        
-      # save as lerobotdatset
-      if self.cfg.lerobot_dataset_cfg.save_as_lerobot:
-        lerobot_dataset.save_to_lerobot(timesteps, actions)
+      h5_dataset.save_to_hdf5(timesteps, actions)
       
       count += 1 
       

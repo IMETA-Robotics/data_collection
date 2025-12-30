@@ -26,6 +26,35 @@ class DataCollection(Node):
     self.master_arm_left_state = None
     self.puppet_arm_right_state = None
     self.puppet_arm_left_state = None
+    # 添加数据更新标志字典
+    if self.cfg.robotic_arm_cfg.collection_type == "one_master":
+      self.data_updated = {
+          "master_arm_right": False,
+      }
+    elif self.cfg.robotic_arm_cfg.collection_type == "two_master":
+      self.data_updated = {
+          "master_arm_right": False,
+          "master_arm_left": False,
+      }
+    elif self.cfg.robotic_arm_cfg.collection_type == "one_master_slave":
+      self.data_updated = {
+          "master_arm_right": False,
+          "puppet_arm_right": False,
+      }
+    elif self.cfg.robotic_arm_cfg.collection_type == "two_master_slave":
+      self.data_updated = {
+          "master_arm_right": False,
+          "master_arm_left": False,
+          "puppet_arm_right": False, 
+          "puppet_arm_left": False,
+      }
+    else:
+      print(f"Unsupport collection type: {self.cfg.robotic_arm_cfg.collection_type}")
+      exit(1)
+      
+    for cam_name in self.cfg.camera_cfg.camera_names:
+      self.data_updated[cam_name] = False
+
     self.img_dict = {"cam_right_wrist": None,
                      "cam_left_wrist": None,
                      "cam_high": None,
@@ -115,16 +144,20 @@ class DataCollection(Node):
             Image, camera_cfg.depth_low_topic, self.depth_low_callback, 1)
 
   def master_arm_right_callback(self, msg: ArmJointState):
-    self.master_arm_right_state = msg 
+    self.master_arm_right_state = msg
+    self.data_updated["master_arm_right"] = True  # 标记为新数据
     
   def puppet_arm_right_callback(self, msg: ArmJointState):
     self.puppet_arm_right_state = msg
+    self.data_updated["puppet_arm_right"] = True  # 标记为新数据
     
   def master_arm_left_callback(self, msg: ArmJointState):
     self.master_arm_left_state = msg
+    self.data_updated["master_arm_left"] = True  # 标记为新数据
     
   def puppet_arm_left_callback(self, msg: ArmJointState):
     self.puppet_arm_left_state = msg
+    self.data_updated["puppet_arm_left"] = True  # 标记为新数据
     
   def img_right_callback(self, msg: Image):
     cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
@@ -132,6 +165,7 @@ class DataCollection(Node):
     ret, buf = cv2.imencode('.jpg', cv_image)
     if ret:
       self.img_dict["cam_right_wrist"] = buf.tobytes()
+      self.data_updated["cam_right_wrist"] = True  # 标记为新数据
     
   def img_left_callback(self, msg: Image):
     cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
@@ -139,6 +173,7 @@ class DataCollection(Node):
     ret, buf = cv2.imencode('.jpg', cv_image)
     if ret:
       self.img_dict["cam_left_wrist"] = buf.tobytes()
+      self.data_updated["cam_left_wrist"] = True  # 标记为新数据
     
   def img_high_callback(self, msg: Image):
     cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
@@ -146,6 +181,7 @@ class DataCollection(Node):
     ret, buf = cv2.imencode('.jpg', cv_image)
     if ret:
       self.img_dict["cam_high"] = buf.tobytes()
+      self.data_updated["cam_high"] = True  # 标记为新数据
     
   def img_low_callback(self, msg: Image):
     cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
@@ -153,6 +189,7 @@ class DataCollection(Node):
     ret, buf = cv2.imencode('.jpg', cv_image)
     if ret:
       self.img_dict["cam_low"] = buf.tobytes()
+      self.data_updated["cam_low"] = True  # 标记为新数据
     
   def depth_right_callback(self, msg: Image):
     self.depth_right = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
@@ -283,7 +320,9 @@ class DataCollection(Node):
     
     while rclpy.ok():
       loop_start_time = time.perf_counter()
-      rclpy.spin_once(self, timeout_sec=0.01)
+
+      # 执行spin_once处理新消息
+      rclpy.spin_once(self, timeout_sec=0.001)
 
       if events["finish_current_recording"]:
         events["finish_current_recording"] = False
@@ -293,6 +332,17 @@ class DataCollection(Node):
         print("Exit program!")
         rclpy.shutdown()
         exit(1)
+
+      # 检查所需数据是否已更新
+      all_update = True
+      for key in self.data_updated:
+        if not self.data_updated[key]:
+          # print(f"not receive {key}")
+          all_update = False
+          break
+      
+      if not all_update:
+        continue
       
       frame = self.get_frame() 
       if not frame:
@@ -304,6 +354,10 @@ class DataCollection(Node):
       elif get_frame is False:
         print("get frame success!")
         get_frame = True
+
+      # 清空更新标志，确保下一次获取的是“新一轮”的数据
+      for key in self.data_updated:
+        self.data_updated[key] = False
       
       # observation
       obs = collections.OrderedDict()

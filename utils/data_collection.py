@@ -70,6 +70,13 @@ class DataCollection(Node):
     rclpy.shutdown()
     
   def init_subscriptions(self):
+    # 使用只保留最新消息的QoS配置
+    qos_profile = rclpy.qos.QoSProfile(
+        depth=1,  # 只保留最新的1条消息
+        durability=rclpy.qos.DurabilityPolicy.VOLATILE,
+        reliability=rclpy.qos.ReliabilityPolicy.BEST_EFFORT,
+        history=rclpy.qos.HistoryPolicy.KEEP_LAST
+    )
     # subscribe robotic arm data
     robotic_arm_cfg = self.cfg.robotic_arm_cfg
     if robotic_arm_cfg.master_arm_right_topic is not None:
@@ -77,28 +84,28 @@ class DataCollection(Node):
             ArmJointState,
             robotic_arm_cfg.master_arm_right_topic,
             self.master_arm_right_callback,
-            1)
+            qos_profile)
     
     if robotic_arm_cfg.master_arm_left_topic is not None:
         self.create_subscription(
             ArmJointState,
             robotic_arm_cfg.master_arm_left_topic,
             self.master_arm_left_callback,
-            1)
+            qos_profile)
     
     if robotic_arm_cfg.puppet_arm_right_topic is not None:
         self.create_subscription(
             ArmJointState,
             robotic_arm_cfg.puppet_arm_right_topic,
             self.puppet_arm_right_callback,
-            1)
+            qos_profile)
         
     if robotic_arm_cfg.puppet_arm_left_topic is not None:
         self.create_subscription(
             ArmJointState,
             robotic_arm_cfg.puppet_arm_left_topic,
             self.puppet_arm_left_callback,
-            1)
+            qos_profile)
       
     # subscribe camera rgb data
     camera_cfg = self.cfg.camera_cfg

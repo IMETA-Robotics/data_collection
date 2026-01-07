@@ -37,7 +37,7 @@ Choose one of the following two methods
 | R(r)     | Restart collect current episode  |
 | Q(q)     | exit
 
-## 2.1 collecte data with hdf5 format
+## collecte data with hdf5 format
 
 source the ros env first, because we use rosmsg in data collection.
 if you use python sdk:
@@ -109,44 +109,21 @@ if you have two master and two slave arm:
 | img_front_topic | "/camera_front/color/image_raw"                     | front camera rgb image topic           |
 
 
-## 2.2. collecte data with LeRobotDataset V2.1 format
-
-### 2.2.1 install lerobot in current python env "imeta_data_collection"  
-  if you want use LeRobotDataset V2.1, install lerobot first:  
-  ```sh
-  git clone https://github.com/imeta-lab/imeta_lerobot.git  
-  cd imeta_lerobot/lerobot  
-  pip install -e .
-  ```
-
-### 2.2.2 set save_as_lerobot to True in yaml file  
-  ```sh
-  save_as_lerobot: True
-  ```
-
-### 2.2.3 use the program in 2.1 to collect data  
-
-  ```sh
-  python -m scripts.record_data config_file=cfg/your_example.yaml
-  ```
-
-### 2.2.4 or convert hdf5 data to lerobot (Recommended)  
-
-  ```sh
-  python -m scripts.convert_h5_to_lerobot --config.raw-dir=data/pick_and_place/ --config.repo-id=y1/pick_and_place
-  ```
-
-# 3. Data visualization
+# 3. Data replay and visualization
 ## 3.1 visualize hdf5 data:
 
   ```sh
   python -m scripts.visualize_h5_episode --dataset_dir data/pick_and_place/ --episode_idx 0
   ```
 
-## 3.2 visualize lerobot data:
-Refer to the script of lerobot:
-
-  'lerobot.scripts.visualize_dataset.py`
+## 3.2 replay data:
+  ```sh
+  ## single arm data
+  python scripts/replay_data.py --dataset_dir data/test/ --episode_idx 0 --single_arm True
+  
+  ## two arm data
+  python scripts/replay_data.py --dataset_dir data/test/ --episode_idx 0
+  ```
 
 # you can use h5dump to view hdf5 data: 
 Show only the file structure (no data):  

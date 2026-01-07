@@ -1,10 +1,11 @@
-task_description: "pick and place two water bottle"
+task_description: "test"
 num_episodes: 60
 save_rate: 30
+skip_static_data: True
 
 hdf5_cfg:
   dataset_dir: "data/"
-  task_name: "pick_two_water_bottle_20251215"
+  task_name: "test"
 
 robotic_arm_cfg:
   collection_type: "one_master"

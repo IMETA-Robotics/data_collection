@@ -19,6 +19,7 @@ class DataCollection:
     self.master_arm_left_state = None
     self.puppet_arm_right_state = None
     self.puppet_arm_left_state = None
+    self.last_state = None  # for check static or move
     self.img_dict = {}
     self.depth_dict = {}
     self.init_topic()
@@ -266,7 +267,20 @@ class DataCollection:
         print("get frame failed!")
         rate.sleep()
         continue
-      
+
+      # not save static data
+      if self.cfg.skip_static_data:
+        if first_step:
+          self.last_state = frame["state"]
+        else:
+          if np.all(np.abs(self.last_state - frame["state"]) < 0.0001):
+            # print("Skip static data!")
+            rate.sleep()
+            continue
+          else:
+            # print("Collecting data...")
+            self.last_state = frame["state"]
+          
       # observation
       obs = collections.OrderedDict()
       

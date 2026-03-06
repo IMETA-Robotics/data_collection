@@ -95,12 +95,20 @@ if you have two master and two slave arm:
 
 
 # 3. Data visualization
-## visualize hdf5 data:
+## 3.1 visualize hdf5 data:
 
   ```sh
   python -m scripts.visualize_h5_episode --dataset_dir data/pick_and_place/ --episode_idx 0
   ```
 
+## 3.2 replay data:
+  ```sh
+  ## single arm data
+  python scripts/replay_data.py --dataset_dir data/test/ --episode_idx 0 --single_arm True
+  
+  ## two arm data
+  python scripts/replay_data.py --dataset_dir data/test/ --episode_idx 0
+  ```
 
 # you can use h5dump to view hdf5 data: 
 Show only the file structure (no data):  

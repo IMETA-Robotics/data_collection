@@ -83,6 +83,10 @@ class DataCollectionCfg:
   
   save_rate: int = 30
   """The frequency of save data. default is 30."""
+
+  skip_static_data: bool = True
+  """Whether to skip static data."""
+
   
   hdf5_cfg: Hdf5Cfg = Hdf5Cfg()
   """Configuration for save data as hdf5."""

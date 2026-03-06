@@ -1,6 +1,7 @@
 task_description: "y1 pick and place"
 num_episodes: 60
 save_rate: 30
+skip_static_data: True
 
 hdf5_cfg:
   dataset_dir: "data/"

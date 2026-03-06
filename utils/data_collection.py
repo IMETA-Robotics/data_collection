@@ -26,6 +26,7 @@ class DataCollection(Node):
     self.master_arm_left_state = None
     self.puppet_arm_right_state = None
     self.puppet_arm_left_state = None
+    self.last_state = None  # for check static or move
     # 添加数据更新标志字典
     if self.cfg.robotic_arm_cfg.collection_type == "one_master":
       self.data_updated = {
@@ -347,7 +348,7 @@ class DataCollection(Node):
           # print(f"not receive {key}")
           all_update = False
           break
-      
+
       if not all_update:
         continue
       
@@ -365,6 +366,20 @@ class DataCollection(Node):
       # 清空更新标志，确保下一次获取的是“新一轮”的数据
       for key in self.data_updated:
         self.data_updated[key] = False
+
+      # not save static data
+      if self.cfg.skip_static_data:
+        if first_step:
+          self.last_state = frame["state"]
+        else:
+          if np.all(np.abs(self.last_state - frame["state"]) < 0.0001):
+            # print("Skip static data!")
+            # Maintain frequency
+            time.sleep(max(0, target_period - (time.perf_counter() - loop_start_time)))
+            continue
+          else:
+            # print("Collecting data...")
+            self.last_state = frame["state"]
       
       # observation
       obs = collections.OrderedDict()
